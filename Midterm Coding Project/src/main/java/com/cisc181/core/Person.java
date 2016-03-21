@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.cisc181.exceptions.PersonException;
+
 /*
  * comment
  */
@@ -46,10 +48,23 @@ public abstract class Person implements java.io.Serializable {
 		return DOB;
 	}
 
-	public void setDOB(Date DOB){
+	public void setDOB(Date DOB) throws PersonException {
+		
+		int MaxAge = 100;
+		
+		Calendar current = Calendar.getInstance();
+		Calendar DateOfBirth = Calendar.getInstance();
+		
+		current.set(current.get(Calendar.YEAR) - MaxAge, 
+				    current.get(Calendar.MONTH), 
+			        current.get(Calendar.DATE));
+		
+		DateOfBirth.setTime(DOB);
+		
+		if(!(DateOfBirth.compareTo(current) > 0))
+			throw new PersonException(this, "Error: Invalid Birth Date");
+		
 		this.DOB = DOB;
-		
-		
 	}
 
 	public void setAddress(String newAddress) {
@@ -60,8 +75,13 @@ public abstract class Person implements java.io.Serializable {
 		return address;
 	}
 
-	public void setPhone(String newPhone_number) {
-		phone_number = newPhone_number;
+	public void setPhone(String Phone) throws PersonException {
+		
+		String regex = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+		if (Phone.matches(regex) == false) 
+			throw new PersonException (this, "Error");
+		
+		phone_number = Phone;
 	
 	}
 
@@ -94,10 +114,20 @@ public abstract class Person implements java.io.Serializable {
 		this.FirstName = FirstName;
 		this.MiddleName = MiddleName;
 		this.LastName = LastName;
-		this.setDOB(DOB);
 		this.address = Address;
-		this.setPhone(Phone_number);
 		this.email_address = Email;
+		
+		try {
+			this.setDOB(DOB);
+		} catch (PersonException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			this.setPhone(Phone_number);
+		} catch (PersonException e) {
+			e.printStackTrace();
+		}
 		
 	}
 
